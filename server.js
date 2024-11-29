@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 
-const imagePath = path.resolve(__dirname, "images");
+const imagesPath = path.resolve(__dirname, "images");
 
 let propertiesReader = require("properties-reader");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
