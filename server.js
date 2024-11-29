@@ -1,5 +1,8 @@
 const express = require("express");
 const app = express();
+const path = require("path");
+
+const imagePath = path.resolve(__dirname, "images");
 
 let propertiesReader = require("properties-reader");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -27,8 +30,34 @@ async function run() {
 }
 
 
-  run().then(() => {
+run().then(() => {
     app.listen(8765, function () {
         console.log("App started on port 8765");
     });
-  });
+});
+
+app.get("/", function (req, res) {
+    res.send("Welcome to our webpage");
+});
+
+app.param('collectionName',  function(req, res, next, collectionName){
+    if (!req.app.locals.db){
+        return next(new Error('Database connection not established'));
+    }
+    req.collection = req.app.locals.db.collection(collectionName);
+    console.log(req.collection.collectionName);
+    return next();
+});
+
+
+app.get('/:collectionName', async function(req, res, next) {
+    try {
+      const result = await req.collection.find({}).toArray();
+      res.send(result);
+
+    } catch(err) {
+      next(err);
+    }
+});
+
+app.use("/images", express.static(imagesPath));
