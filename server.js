@@ -2,8 +2,10 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const cors = require("cors");
-
 const imagesPath = path.resolve(__dirname, "images");
+
+app.use(express.json());
+
 
 let propertiesReader = require("properties-reader");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -67,11 +69,11 @@ app.get('/:collectionName', async function(req, res, next) {
 
 app.use("/images", express.static(imagesPath));
 
-app.post('/:collectionName', async function(req, res, next) {
-    try {
-        const result = await req.collection.insertOne(req.body); //inserts new order in collection
-        res.status(201).send(result); //sends success response with status code 201
-    } catch (err) {
-        next(err);
-    }
-});
+// app.post('/:collectionName', async function(req, res, next) {
+//     try {
+//         const result = await req.collection.insertOne(req.body); //inserts new order in collection
+//         res.status(201).send(result); //sends success response with status code 201
+//     } catch (err) {
+//         next(err);
+//     }
+// });
