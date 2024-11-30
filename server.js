@@ -69,11 +69,22 @@ app.get('/:collectionName', async function(req, res, next) {
 
 app.use("/images", express.static(imagesPath));
 
-// app.post('/:collectionName', async function(req, res, next) {
-//     try {
-//         const result = await req.collection.insertOne(req.body); //inserts new order in collection
-//         res.status(201).send(result); //sends success response with status code 201
-//     } catch (err) {
-//         next(err);
-//     }
-// });
+app.post('/order', async function(req, res) {
+  try {
+      const { name, phoneNumber, lessonIDs } = req.body;
+      const orderData = { name, phoneNumber, lessonIDs };
+
+      // Validate input fields
+      if (!name || !phoneNumber || !Array.isArray(lessonIDs)) {
+          return res.status(400).send({ error: 'Invalid order data.' });
+      }
+
+      const collection = req.app.locals.db.collection('order'); // accesses the order collection
+
+      const result = await collection.insertOne(orderData); // inserts new order into the collection
+      res.status(201).send({ message: "Order successfully saved", orderID: result.insertedId }); // sends success response with status code 201
+  } catch (err) {
+      console.error("Error inserting order:", err);
+      res.status(500).send({ error: 'Failed to save the order.' });
+  }
+});
