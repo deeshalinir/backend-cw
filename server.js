@@ -74,30 +74,67 @@ app.get('/:collectionName', async function(req, res, next) {
     }
 });
 
-app.get('/search', async function(req, res){
-  let searchQuery =[
+// app.get('/search', async function(req, res){
+//   let searchQuery =[
+//     {
+//       $search: {
+//         index: "default",
+//         text: {
+//           query: "mathematics",
+//           path: "subject"
+//         }
+//       }
+//     }]
+//     const collection = await req.app.locals.db.collection('lessons');
+
+//     try{
+//       const result = await collection.aggregate(searchQuery).toArray();
+//       console.log("Return Search: ", result);
+//       res.status(200).json(result);
+
+//     }catch (err){
+//       console.error("Error getting lesson:", err);
+//       res.status(500).send({ error: 'Failed to get lesson.' });
+//     }
+
+// });
+
+app.get('/search', async function (req, res) {
+  const searchTerm = req.query.s; // Get the search term from query parameter
+
+  if (!searchTerm) {
+    return res.status(400).json({ error: "Search term is required." });
+  }
+
+  const searchQuery = [
     {
       $search: {
-        index: "default",
+        index: "default", // Ensure this index is correctly set in MongoDB Atlas
         text: {
-          query: "mathematics",
-          path: "subject"
+          query: searchTerm, // Use the search term from query parameters
+          path: { wildcard: "*" } // Search all fields
         }
       }
-    }]
-    const collection = await req.app.locals.db.collection('lessons');
+    }
+  ];
 
-    try{
-      const result = await collection.aggregate(searchQuery).toArray();
-      console.log("Return Search: ", result);
-      res.status(200).json(result);
-      
-    }catch (err){
-      console.error("Error getting lesson:", err);
-      res.status(500).send({ error: 'Failed to get lesson.' });
+  const collection = req.app.locals.db.collection('lessons');
+
+  try {
+    const result = await collection.aggregate(searchQuery).toArray();
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No matching lessons found." });
     }
 
+    console.log("Search Result: ", result);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error getting lessons:", err);
+    res.status(500).send({ error: "Failed to perform search." });
+  }
 });
+
 
 app.post('/order', async function(req, res) {
   try {
