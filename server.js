@@ -90,7 +90,7 @@ app.get('/search', async function(req,res){
     const collection = req.app.locals.db.collection('lessons');
 
     try{
-      const result = await collection.aggregate(query).toArray();
+      const result = await collection.aggregate([query]).toArray();
       console.log("Return Search: ", result);
       res.status(200).json(result);
     }catch (err){
