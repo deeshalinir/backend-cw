@@ -91,6 +91,7 @@ app.get('/search', async function(req, res){
       const result = await collection.aggregate(searchQuery).toArray();
       console.log("Return Search: ", result);
       res.status(200).json(result);
+      
     }catch (err){
       console.error("Error getting lesson:", err);
       res.status(500).send({ error: 'Failed to get lesson.' });
