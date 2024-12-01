@@ -74,6 +74,31 @@ app.get('/:collectionName', async function(req, res, next) {
     }
 });
 
+app.get('/search', async function(req,res){
+  let query =
+    {
+      $search: {
+        index: "default",
+        text: {
+          query: req.query.s,
+          path: {
+            wildcard: "*"
+          }
+        }
+      }
+    }
+    const collection = req.app.locals.db.collection('lessons');
+
+    try{
+      const result = await collection.aggregate(query).toArray();
+      console.log("Return Search: ", result);
+      res.status(200).json(result);
+    }catch (err){
+      console.error("Error getting lesson:", err);
+      res.status(500).send({ error: 'Failed to get lesson.' });
+    }
+
+});
 
 app.post('/order', async function(req, res) {
   try {
