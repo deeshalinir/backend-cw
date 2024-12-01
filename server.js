@@ -85,7 +85,7 @@ app.get('/search', async function(req,res){
         }
       }
     }]
-    const collection = req.app.locals.db.collection('lessons');
+    const collection = await req.app.locals.db.collection('lessons');
 
     try{
       const result = await collection.aggregate(searchQuery).toArray();
