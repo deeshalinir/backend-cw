@@ -80,8 +80,21 @@ app.post('/order', async function(req, res) {
       }
 
       const collection = req.app.locals.db.collection('order'); // accesses the order collection
-
+      
       const result = await collection.insertOne(orderData); // inserts new order into the collection
+      
+      //updates the available space for each lesson in the order
+      for (let lessonId of lessonIDs) {
+        const lesson = await req.app.locals.db.collection('lessons').findOne({_id: new ObjectId(lessonId)});
+        if (lesson) {
+          const updateSpaces =lesson.spaces -1; //decrements space by 1
+          await req.app.locals.db.collection('lessons').updateOne(
+            {_id: new ObjectId(lessonId)},
+            { $set: { spaces: availableSpaces}}
+          );
+        }
+      }
+      
       res.status(201).send({ message: "Order successfully saved", orderID: result.insertedId }); // sends success response with status code 201
   } catch (err) {
       console.error("Error inserting order:", err);
@@ -102,10 +115,10 @@ app.put('/lesson/:id', async (req, res) => {
 
     const result = await collection.updateOne( //updates the availableSpace field (frontend)
       {_id: new ObjectId(lessonId)},
-      { $set: { availableSpaces: availableSpaces}}
+      { $set: { spaces: availableSpaces}}
     );
 
-    if (result.macthedCount === 0) {
+    if (result.matchedCount === 0) {
       return res.status(404).send({error: 'Lesson not found.'});
     }
 
@@ -114,4 +127,9 @@ app.put('/lesson/:id', async (req, res) => {
     console.error('Error updating lesson:', err);
     res.status(500).send({ error: 'Failed to update the lesson.'});
   }
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({error: 'An internal server error occured.'});
 });
