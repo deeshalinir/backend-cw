@@ -92,18 +92,19 @@ app.put('/lesson/:id', async (req, res) => {
   try{
     const lessonId = req.params.id; //it gets the lesson id
     const { availableSpaces} = req.body;
+    console.log('lessonid :', lessonId)
 
-    if (typeof availableSpaces !== 'number') {
-      return res.status(400).send({ error: 'Invalid data: availableSpaces must be a number.' });
-    }
+    // if (typeof availableSpaces !== 'number') {
+    //   return res.status(400).send({ error: 'Invalid data: availableSpaces must be a number.' });
+    // }
     
     const collection = req.app.locals.db.collection('lessons'); //accesses the 'lessons' collection
     
     //const updateFields = req.body; //extracts the 'spaces' field from the request body
     
     const result = await collection.updateOne( //updates the availableSpace field (frontend)
-          {_id: new ObjectId(lessonId)},
-          { $set: updateFields}
+          {id: lessonId},
+          { $set: {'spaces': availableSpaces}}
     );
 
     if (result.matchedCount === 0) {
