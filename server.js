@@ -75,7 +75,7 @@ app.get('/:collectionName', async function(req, res, next) {
 });
 
 app.get('/search', async function(req,res){
-  let query =
+  let searchQuery =[
     {
       $search: {
         index: "default",
@@ -84,11 +84,11 @@ app.get('/search', async function(req,res){
           path: "subject"
         }
       }
-    }
+    }]
     const collection = req.app.locals.db.collection('lessons');
 
     try{
-      const result = await collection.aggregate([query]).toArray();
+      const result = await collection.aggregate(searchQuery).toArray();
       console.log("Return Search: ", result);
       res.status(200).json(result);
     }catch (err){
