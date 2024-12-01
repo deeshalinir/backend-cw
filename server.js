@@ -74,13 +74,13 @@ app.get('/:collectionName', async function(req, res, next) {
     }
 });
 
-app.get('/search', async function(req,res){
+app.get('/search', async function(req, res){
   let searchQuery =[
     {
       $search: {
         index: "default",
         text: {
-          query: req.query.s,
+          query: "mathematics",
           path: "subject"
         }
       }
