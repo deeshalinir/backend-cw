@@ -81,9 +81,7 @@ app.get('/search', async function(req,res){
         index: "default",
         text: {
           query: req.query.s,
-          path: {
-            wildcard: "*"
-          }
+          path: "subject"
         }
       }
     }
