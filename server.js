@@ -92,7 +92,7 @@ app.put('/lesson/:id', async (req, res) => {
   try{
 
     const lessonId = parseInt(req.params.id, 10); //it gets the lesson id
-    const { availableSpaces} = req.body;
+    const { spaces} = req.body;
     console.log('lessonid :', lessonId)
 
     // if (typeof availableSpaces !== 'number') {
@@ -105,7 +105,7 @@ app.put('/lesson/:id', async (req, res) => {
     
     const result = await collection.updateOne( //updates the availableSpace field (frontend)
           {id: lessonId},
-          { $set: {'spaces': availableSpaces}}
+          { $set: {'spaces': spaces}}
     );
 
     if (result.matchedCount === 0) {
