@@ -58,7 +58,6 @@ app.param('collectionName',  function(req, res, next, collectionName){
     return next();
 });
 
-
 app.get('/:collectionName', async function(req, res, next) {
     try {
       const result = await req.collection.find({}).toArray();
@@ -68,7 +67,6 @@ app.get('/:collectionName', async function(req, res, next) {
       next(err);
     }
 });
-
 
 
 app.post('/order', async function(req, res) {
