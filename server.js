@@ -88,3 +88,30 @@ app.post('/order', async function(req, res) {
       res.status(500).send({ error: 'Failed to save the order.' });
   }
 });
+
+app.put('/lesson/:id', async (req, res) => {
+  try{
+    const lessonId = req.params.id; //it gets the lesson id
+    const updateData = req.body; //new data to update the lesson
+
+    if(!ObjectId.isValid(lessonId)) {
+      return res.status(400).send({error:'Invalid lesson ID.'});
+    }
+
+    const collection = req.app.locals.db.collection('lessons'); //accesses the 'lessons' collection
+
+    const result = await collection.updateOne( //updates the availableSpace field (frontend)
+      {_id: new ObjectId(lessonId)},
+      { $set: { availableSpaces: availableSpaces}}
+    );
+
+    if (result.macthedCount === 0) {
+      return res.status(404).send({error: 'Lesson not found.'});
+    }
+
+    res.status(200).send({ message: 'Lesson updated successfully.'});
+  } catch (err){
+    console.error('Error updating lesson:', err);
+    res.status(500).send({ error: 'Failed to update the lesson.'});
+  }
+});
