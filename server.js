@@ -90,7 +90,8 @@ app.post('/order', async function(req, res) {
 
 app.put('/lesson/:id', async (req, res) => {
   try{
-    const lessonId = req.params.id; //it gets the lesson id
+
+    const lessonId = parseInt(req.params.id, 10); //it gets the lesson id
     const { availableSpaces} = req.body;
     console.log('lessonid :', lessonId)
 
