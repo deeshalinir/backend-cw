@@ -32,6 +32,11 @@ async function run() {
     }
 }
 
+//logger middleware
+function logger(req, res, next){
+  console.log(`${req.metho} ${req.url}`);
+  next();
+}
 
 run().then(() => {
     app.listen(8765, function () {
@@ -43,6 +48,7 @@ app.use(cors({
     origin: '*'
 }));
 
+app.use(logger);
 app.get("/", function (req, res) {
     res.send("Welcome to our webpage");
 });
@@ -85,12 +91,21 @@ app.post('/order', async function(req, res) {
 app.put('/lesson/:id', async (req, res) => {
   try{
     const lessonId = req.params.id; //it gets the lesson id
-    const updateFields = req.body; //extracts the 'spaces' field from the request body
+    const { availableSpaces} = req.body;
+
+    if (typeof availableSpaces !== 'number') {
+      return res.status(400).send({ error: 'Invalid data: availableSpaces must be a number.' });
+    }
+    
     const collection = req.app.locals.db.collection('lessons'); //accesses the 'lessons' collection
+    
+    //const updateFields = req.body; //extracts the 'spaces' field from the request body
+    
     const result = await collection.updateOne( //updates the availableSpace field (frontend)
           {_id: new ObjectId(lessonId)},
           { $set: updateFields}
-        );
+    );
+
     if (result.matchedCount === 0) {
       return res.status(404).send({error: 'Lesson not found.'});
     }
@@ -101,6 +116,7 @@ app.put('/lesson/:id', async (req, res) => {
   }
 });
 
+//error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({error: 'An internal server error occured.'});
