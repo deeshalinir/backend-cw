@@ -47,6 +47,8 @@ app.get("/", function (req, res) {
     res.send("Welcome to our webpage");
 });
 
+app.use("/images", express.static(imagesPath));
+
 app.param('collectionName',  function(req, res, next, collectionName){
     if (!req.app.locals.db){
         return next(new Error('Database connection not established'));
@@ -67,34 +69,14 @@ app.get('/:collectionName', async function(req, res, next) {
     }
 });
 
-app.use("/images", express.static(imagesPath));
+
 
 app.post('/order', async function(req, res) {
   try {
       const { name, phoneNumber, lessonIDs } = req.body;
       const orderData = { name, phoneNumber, lessonIDs };
-
-      // Validate input fields
-      if (!name || !phoneNumber || !Array.isArray(lessonIDs)) {
-          return res.status(400).send({ error: 'Invalid order data.' });
-      }
-
       const collection = req.app.locals.db.collection('order'); // accesses the order collection
-      
-      const result = await collection.insertOne(orderData); // inserts new order into the collection
-      
-      //updates the available space for each lesson in the order
-      for (let lessonId of lessonIDs) {
-        const lesson = await req.app.locals.db.collection('lessons').findOne({_id: new ObjectId(lessonId)});
-        if (lesson) {
-          const updateSpaces =lesson.spaces -1; //decrements space by 1
-          await req.app.locals.db.collection('lessons').updateOne(
-            {_id: new ObjectId(lessonId)},
-            { $set: { spaces: availableSpaces}}
-          );
-        }
-      }
-      
+      const result = await collection.insertOne(orderData); // inserts new order into the collection      
       res.status(201).send({ message: "Order successfully saved", orderID: result.insertedId }); // sends success response with status code 201
   } catch (err) {
       console.error("Error inserting order:", err);
@@ -105,23 +87,15 @@ app.post('/order', async function(req, res) {
 app.put('/lesson/:id', async (req, res) => {
   try{
     const lessonId = req.params.id; //it gets the lesson id
-    const updateData = req.body; //new data to update the lesson
-
-    if(!ObjectId.isValid(lessonId)) {
-      return res.status(400).send({error:'Invalid lesson ID.'});
-    }
-
+    const updateFields = req.body; //extracts the 'spaces' field from the request body
     const collection = req.app.locals.db.collection('lessons'); //accesses the 'lessons' collection
-
     const result = await collection.updateOne( //updates the availableSpace field (frontend)
-      {_id: new ObjectId(lessonId)},
-      { $set: { spaces: availableSpaces}}
-    );
-
+          {_id: new ObjectId(lessonId)},
+          { $set: updateFields}
+        );
     if (result.matchedCount === 0) {
       return res.status(404).send({error: 'Lesson not found.'});
     }
-
     res.status(200).send({ message: 'Lesson updated successfully.'});
   } catch (err){
     console.error('Error updating lesson:', err);
